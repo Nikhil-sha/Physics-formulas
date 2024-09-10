@@ -1,1 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Projectile Motion Simulator</title>
+	<script src="https://cdn.tailwindcss.com"></script> <!-- Link to Tailwind CSS -->
+</head>
+
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800 p-4">
+
+	<h1 class="text-4xl font-bold mb-8 text-indigo-600 text-center">Projectile Motion Simulator</h1>
+
+	<!-- Input fields for velocity and angle -->
+	<div class="mb-6 flex flex-col items-center space-y-4">
+		<div>
+			<label for="velocity" class="block text-lg font-medium text-gray-700 mb-2">Initial Velocity (m/s):</label>
+			<input type="number" id="velocity" class="border border-gray-300 p-2 rounded-md" value="50">
+		</div>
+
+		<div>
+			<label for="angle" class="block text-lg font-medium text-gray-700 mb-2">Launch Angle (degrees):</label>
+			<input type="number" id="angle" class="border border-gray-300 p-2 rounded-md" value="45">
+		</div>
+
+		<div>
+			<label for="g" class="block text-lg font-medium text-gray-700 mb-2">Gravity Constant :</label>
+			<input type="number" id="g" class="border border-gray-300 p-2 rounded-md" value="9.8">
+		</div>
+
+		<button onclick="startSimulation()" class="bg-indigo-500 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-600 transition">
+			Start Simulation
+		</button>
+	</div>
+
+	<!-- Canvas for visualizing the projectile motion -->
+	<canvas id="canvas" width="300" height="300" class="border border-gray-400 bg-white rounded-md"></canvas>
+
+	<script>
+		function startSimulation() {
+			const velocity = parseFloat(document.getElementById('velocity').value);
+			const angle = parseFloat(document.getElementById('angle').value);
+			const g = parseFloat(document.getElementById("g").value); // gravity constant
+
+			const canvas = document.getElementById('canvas');
+			const ctx = canvas.getContext('2d');
+
+			const angleRad = (angle * Math.PI) / 180; // convert angle to radians
+			const vX = velocity * Math.cos(angleRad); // horizontal velocity component
+			const vY = velocity * Math.sin(angleRad); // initial vertical velocity component
+
+			let x = 0;
+			let y = canvas.height;
+
+			let t = 0; // time
+			const timeIncrement = 0.09;
+
+			// Clear the canvas before starting
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Function to update the position and draw the projectile
+			function drawProjectile() {
+				t += timeIncrement;
+
+				// Update position using projectile motion formulas
+				x = vX * t;
+				y = canvas.height - (vY * t - 0.5 * g * t * t); // y-position with gravity
+
+				// Stop when the projectile hits the ground
+				if (y >= canvas.height) {
+					return;
+				}
+
+				// Clear the canvas for the new frame
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// Draw the projectile
+				ctx.beginPath();
+				ctx.arc(x, y, 5, 0, Math.PI * 2); // small circle representing the projectile
+				ctx.fill();
+
+				// Call the function recursively for the next frame
+				requestAnimationFrame(drawProjectile);
+			}
+
+			// Start the animation
+			drawProjectile();
+		}
+	</script>
+
+</body>
+
+</html>
