@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pendulum Simulation with Damping</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800 p-4">
+
+	<h1 class="text-4xl font-bold mb-8 text-indigo-600 text-center">Pendulum Simulation</h1>
+
+	<!-- Input controls -->
+	<div class="mb-6 flex flex-col items-center space-y-4">
+		<div>
+			<label for="maxAngle" class="block text-lg">Max Angle (degrees):</label>
+			<input id="maxAngle" type="number" class="px-4 py-2 border rounded" placeholder="e.g. 45">
+		</div>
+
+		<button onclick="startSimulation()" class="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+			Start Simulation
+		</button>
+	</div>
+
+	<div id="pendulum" class="relative w-[200px] h-[200px] bg-white rounded-md border">
+		<div class="rod bg-black w-[2px] h-[100px] absolute left-1/2 transform origin-top rounded">
+			<div class="bob bg-red-500 w-[20px] h-[20px] rounded-full absolute bottom-0 left-1/2 transform -translate-x-1/2"></div>
+		</div>
+	</div>
+
+	<script>
+		const rod = document.querySelector('.rod');
+		const bob = document.querySelector('.bob');
+
+		const length = 1; // Length of the pendulum in meters (1 meter is a good default)
+		const gravity = 9.8; // Acceleration due to gravity
+		let damping = 0.995; // Damping factor (energy loss per cycle)
+		let period, maxAngle, initialMaxAngle, time, intervalId;
+
+		function startSimulation() {
+			// Get user inputs
+			const angleInput = document.getElementById('maxAngle').value;
+
+			// Convert inputs to appropriate values
+			initialMaxAngle = (angleInput ? angleInput : 45) * Math.PI / 180; // Convert degrees to radians
+			damping = 0.97; // Reset damping for each simulation
+
+			// Initialize variables
+			maxAngle = initialMaxAngle / 2;
+			time = 0;
+			period = 2 * Math.PI * Math.sqrt(length / gravity); // Calculate the period based on the pendulum's length
+
+			clearInterval(intervalId);
+
+			// Start the pendulum animation
+			intervalId = setInterval(() => {
+				time += 0.016; // Simulate time passing (every 16 ms ~ 60fps)
+
+				// Calculate the current angle using harmonic motion
+				const angle = maxAngle * Math.cos(2 * Math.PI * time / period);
+
+				// Apply the calculated angle to the rod for rotation
+				rod.style.transform = `rotate(${angle}rad)`;
+
+				// Apply damping once per full cycle (when time reaches multiples of period)
+				if (time % period < 0.016) {
+					maxAngle *= damping;
+				}
+
+				// Stop the simulation if the amplitude is very small (near stop)
+				if (maxAngle < 0.01) {
+					clearInterval(intervalId);
+					return;
+				}
+			}, 16); // Update every 16ms (~60fps)
+		}
+	</script>
+
+</body>
+
+</html>
